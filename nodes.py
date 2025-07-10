@@ -1,5 +1,6 @@
 
 import os
+import math
 import torch
 import numpy as np
 from ultralytics import YOLO, SAM
@@ -8,6 +9,7 @@ import json
 import comfy
 from torchvision import transforms
 import torch.nn.functional as F
+from torch.nn.utils.rnn import pad_sequence
 from nodes import MAX_RESOLUTION
 import torchvision
 from PIL import Image, ImageDraw
@@ -305,12 +307,12 @@ class BBoxVisNode:
     def draw_bbox(self, image, bboxes, category_ids, font_scale, rect_size=None, text_size=None, show_label=True):
         if image.dim() == 4 and image.size(0) == 1:
             image = image.squeeze(0)
-        
+
         image = image.cpu().numpy()
-        
+
         if image.shape[0] == 3:
             image = np.transpose(image, (1, 2, 0))
-        
+
         if image.max() <= 1.0:
             image = (image * 255).astype(np.uint8)
 
@@ -352,8 +354,8 @@ class BBoxVisNode:
                     thickness=text_size,
                 )
         tensor_image = torch.from_numpy(image).unsqueeze(0).float() / 255.0
-        
-        
+
+
         return (tensor_image,)
 
 class GetImageSize:
@@ -523,7 +525,7 @@ class UltralyticsModelLoader:
                         "yolov8n.pt", "yolov8s.pt", "yolov8m.pt", "yolov8l.pt", "yolov8x.pt",
                         "yolov9t.pt", "yolov9s.pt", "yolov9m.pt", "yolov9c.pt", "yolov9e.pt",
                         "yolov10n.pt", "yolov10s.pt", "yolov10m.pt", "yolov10l.pt", "yolov10x.pt",
-                        
+
                     ],
                 ),
             },
@@ -844,7 +846,7 @@ class UltralyticsInference:
 
             },
         }
-    RETURN_TYPES = ("ULTRALYTICS_RESULTS","IMAGE", "BOXES", "MASKS", "PROBABILITIES", "KEYPOINTS", "OBB", "LABELS",)
+    RETURN_TYPES = ("ULTRALYTICS_RESULTS","IMAGE", "BOXES", "MASKS", "PROBABILITIES", "KEYPOINTS", "OBB", "LABELS", "MASK",)
     FUNCTION = "inference"
     CATEGORY = "Ultralytics/Inference"
 
@@ -861,8 +863,9 @@ class UltralyticsInference:
                 yolo_image = image[i].unsqueeze(0).permute(0, 3, 1, 2)
                 result = model.predict(yolo_image, conf=conf, iou=iou, imgsz=(height, width), device=device, half=half, augment=augment, agnostic_nms=agnostic_nms, classes=class_list)
                 results.append(result)
-
             boxes = [result[0].boxes.xywh for result in results]
+            masks_temp = [self.getComfyMasks(result[0].boxes, image.shape[2], image.shape[1]) for result in results]
+            comfy_masks = pad_sequence(masks_temp, batch_first=True)
             masks = [result[0].masks for result in results]
             probs = [result[0].probs for result in results]
             keypoints = [result[0].keypoints for result in results]
@@ -872,16 +875,38 @@ class UltralyticsInference:
         else:
             yolo_image = image.permute(0, 3, 1, 2)
             results = model.predict(yolo_image, conf=conf, iou=iou, imgsz=(height,width), device=device, half=half, augment=augment, agnostic_nms=agnostic_nms, classes=class_list)
-
             boxes = results[0].boxes.xywh
+            comfy_masks = self.getComfyMasks(results[0].boxes, image.shape[2], image.shape[1])
             masks = results[0].masks
             probs = results[0].probs
             keypoints = results[0].keypoints
-            obb = results[0].obb     
-            labels = results[0].boxes.cls.cpu().tolist()     
+            obb = results[0].obb
+            labels = results[0].boxes.cls.cpu().tolist()
 
-        return (results, image, boxes, masks, probs, keypoints, obb, labels,)
+        return (results, image, boxes, masks, probs, keypoints, obb, labels, comfy_masks, )
 
+    def getComfyMasks(self, boxes, width, height):
+        boxes_xyxyn = boxes.xyxyn
+        masks = []
+        for xyxyn in boxes_xyxyn:
+            # Create an empty tensor filled with zeros
+            mask = torch.zeros((height, width), dtype=torch.float32)
+            # Set the specified region to 1
+            x_start = math.floor(xyxyn[0] * width)
+            y_start = math.floor(xyxyn[1] * height)
+            x_end = math.floor(xyxyn[2] * width)
+            y_end = math.floor(xyxyn[3] * height)
+            mask[y_start:y_end, x_start:x_end] = 1
+            masks.append(mask)
+        # produce comfy mask batch from list
+        if len(masks) > 0:
+            comfy_masks = masks[0].unsqueeze(0)
+            if len(masks) > 1:
+                for mask2 in masks[1:]:
+                    comfy_masks = torch.cat((comfy_masks, mask2.unsqueeze(0)), dim=0)
+            return comfy_masks
+        # return empty mask
+        return torch.zeros((height, width), dtype=torch.float32).unsqueeze(0)
 
 class UltralyticsVisualization:
     @classmethod
@@ -912,7 +937,7 @@ class UltralyticsVisualization:
             annotated_frames = []
             for result in results:
                 for r in result:
-                    im_bgr = r.plot(im_gpu=True, line_width=line_width, font_size=font_size, kpt_line=kpt_line, labels=labels, boxes=boxes, masks=masks, probs=probs, color_mode=color_mode) 
+                    im_bgr = r.plot(im_gpu=True, line_width=line_width, font_size=font_size, kpt_line=kpt_line, labels=labels, boxes=boxes, masks=masks, probs=probs, color_mode=color_mode)
                     annotated_frames.append(im_bgr)
 
             tensor_image = torch.stack([torch.from_numpy(np.array(frame).astype(np.float32) / 255.0) for frame in annotated_frames])
