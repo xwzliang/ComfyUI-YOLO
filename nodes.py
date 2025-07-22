@@ -1,4 +1,3 @@
-
 import os
 import math
 import torch
@@ -21,17 +20,86 @@ from folder_paths import models_dir
 ultra_models_dir = os.path.join(models_dir, "ultralytics")
 
 coco_classes = [
-    'person', 'bicycle', 'car', 'motorcycle', 'airplane', 'bus', 'train', 'truck', 'boat',
-    'traffic light', 'fire hydrant', 'stop sign', 'parking meter', 'bench', 'bird', 'cat',
-    'dog', 'horse', 'sheep', 'cow', 'elephant', 'bear', 'zebra', 'giraffe', 'backpack',
-    'umbrella', 'handbag', 'tie', 'suitcase', 'frisbee', 'skis', 'snowboard', 'sports ball',
-    'kite', 'baseball bat', 'baseball glove', 'skateboard', 'surfboard', 'tennis racket',
-    'bottle', 'wine glass', 'cup', 'fork', 'knife', 'spoon', 'bowl', 'banana', 'apple',
-    'sandwich', 'orange', 'broccoli', 'carrot', 'hot dog', 'pizza', 'donut', 'cake', 'chair',
-    'couch', 'potted plant', 'bed', 'dining table', 'toilet', 'tv', 'laptop', 'mouse',
-    'remote', 'keyboard', 'cell phone', 'microwave', 'oven', 'toaster', 'sink',
-    'refrigerator', 'book', 'clock', 'vase', 'scissors', 'teddy bear', 'hair drier',
-    'toothbrush'
+    "person",
+    "bicycle",
+    "car",
+    "motorcycle",
+    "airplane",
+    "bus",
+    "train",
+    "truck",
+    "boat",
+    "traffic light",
+    "fire hydrant",
+    "stop sign",
+    "parking meter",
+    "bench",
+    "bird",
+    "cat",
+    "dog",
+    "horse",
+    "sheep",
+    "cow",
+    "elephant",
+    "bear",
+    "zebra",
+    "giraffe",
+    "backpack",
+    "umbrella",
+    "handbag",
+    "tie",
+    "suitcase",
+    "frisbee",
+    "skis",
+    "snowboard",
+    "sports ball",
+    "kite",
+    "baseball bat",
+    "baseball glove",
+    "skateboard",
+    "surfboard",
+    "tennis racket",
+    "bottle",
+    "wine glass",
+    "cup",
+    "fork",
+    "knife",
+    "spoon",
+    "bowl",
+    "banana",
+    "apple",
+    "sandwich",
+    "orange",
+    "broccoli",
+    "carrot",
+    "hot dog",
+    "pizza",
+    "donut",
+    "cake",
+    "chair",
+    "couch",
+    "potted plant",
+    "bed",
+    "dining table",
+    "toilet",
+    "tv",
+    "laptop",
+    "mouse",
+    "remote",
+    "keyboard",
+    "cell phone",
+    "microwave",
+    "oven",
+    "toaster",
+    "sink",
+    "refrigerator",
+    "book",
+    "clock",
+    "vase",
+    "scissors",
+    "teddy bear",
+    "hair drier",
+    "toothbrush",
 ]
 _COLORS = (
     np.array(
@@ -293,7 +361,10 @@ class BBoxVisNode:
                 "category_ids": ("LABELS", {"default": "None"}),
                 "rect_size": ("INT", {"default": 3, "min": 0, "step": 1}),
                 "text_size": ("INT", {"default": 2, "min": 0, "step": 1}),
-                "font_scale": ("FLOAT", {"default": 0.6, "min": 0, "max": 1, "step": 0.1}),
+                "font_scale": (
+                    "FLOAT",
+                    {"default": 0.6, "min": 0, "max": 1, "step": 0.1},
+                ),
                 "show_label": ("BOOLEAN", {"default": True}),
             }
         }
@@ -303,8 +374,16 @@ class BBoxVisNode:
 
     CATEGORY = "Ultralytics/Utils"
 
-
-    def draw_bbox(self, image, bboxes, category_ids, font_scale, rect_size=None, text_size=None, show_label=True):
+    def draw_bbox(
+        self,
+        image,
+        bboxes,
+        category_ids,
+        font_scale,
+        rect_size=None,
+        text_size=None,
+        show_label=True,
+    ):
         if image.dim() == 4 and image.size(0) == 1:
             image = image.squeeze(0)
 
@@ -327,10 +406,12 @@ class BBoxVisNode:
             text = f"{category_name[category_id]}"
             font = cv2.FONT_HERSHEY_SIMPLEX
             txt_size = cv2.getTextSize(text, font, font_scale, text_size)[0]
-            txt_color = (0, 0, 0) if np.mean(_COLORS[category_id]) > 0.5 else (255, 255, 255)
+            txt_color = (
+                (0, 0, 0) if np.mean(_COLORS[category_id]) > 0.5 else (255, 255, 255)
+            )
 
             x, y, w, h = bboxes[index]
-            x1, y1, x2, y2 = x - w/2, y - h/2, x + w/2, y + h/2
+            x1, y1, x2, y2 = x - w / 2, y - h / 2, x + w / 2, y + h / 2
             x1, y1, x2, y2 = int(x1), int(y1), int(x2), int(y2)
 
             cv2.rectangle(image, (x1, y1), (x2, y2), color, rect_size)
@@ -355,8 +436,8 @@ class BBoxVisNode:
                 )
         tensor_image = torch.from_numpy(image).unsqueeze(0).float() / 255.0
 
-
         return (tensor_image,)
+
 
 class GetImageSize:
     @classmethod
@@ -366,6 +447,7 @@ class GetImageSize:
                 "image": ("IMAGE",),
             },
         }
+
     RETURN_TYPES = ("INT", "INT")
     RETURN_NAMES = ("Height", "Width")
     FUNCTION = "get_image_size"
@@ -373,7 +455,11 @@ class GetImageSize:
     CATEGORY = "Ultralytics/Utils"
 
     def get_image_size(self, image):
-        return (image.shape[1], image.shape[2],)
+        return (
+            image.shape[1],
+            image.shape[2],
+        )
+
 
 class ImageResizeAdvanced:
     # https://github.com/cubiq/ComfyUI_essentials/blob/main/image.py
@@ -382,21 +468,80 @@ class ImageResizeAdvanced:
         return {
             "required": {
                 "image": ("IMAGE",),
-                "width": ("INT", { "default": 512, "min": 0, "max": MAX_RESOLUTION, "step": 32, }),
-                "height": ("INT", { "default": 512, "min": 0, "max": MAX_RESOLUTION, "step": 32, }),
-                "interpolation": (["nearest", "bilinear", "bicubic", "area", "nearest-exact", "lanczos"],),
+                "width": (
+                    "INT",
+                    {
+                        "default": 512,
+                        "min": 0,
+                        "max": MAX_RESOLUTION,
+                        "step": 32,
+                    },
+                ),
+                "height": (
+                    "INT",
+                    {
+                        "default": 512,
+                        "min": 0,
+                        "max": MAX_RESOLUTION,
+                        "step": 32,
+                    },
+                ),
+                "interpolation": (
+                    [
+                        "nearest",
+                        "bilinear",
+                        "bicubic",
+                        "area",
+                        "nearest-exact",
+                        "lanczos",
+                    ],
+                ),
                 "method": (["stretch", "keep proportion", "fill / crop", "pad"],),
-                "condition": (["always", "downscale if bigger", "upscale if smaller", "if bigger area", "if smaller area"],),
-                "multiple_of": ("INT", { "default": 0, "min": 0, "max": 512, "step": 1, }),
+                "condition": (
+                    [
+                        "always",
+                        "downscale if bigger",
+                        "upscale if smaller",
+                        "if bigger area",
+                        "if smaller area",
+                    ],
+                ),
+                "multiple_of": (
+                    "INT",
+                    {
+                        "default": 0,
+                        "min": 0,
+                        "max": 512,
+                        "step": 1,
+                    },
+                ),
             }
         }
 
-    RETURN_TYPES = ("IMAGE", "INT", "INT",)
-    RETURN_NAMES = ("IMAGE", "width", "height",)
+    RETURN_TYPES = (
+        "IMAGE",
+        "INT",
+        "INT",
+    )
+    RETURN_NAMES = (
+        "IMAGE",
+        "width",
+        "height",
+    )
     FUNCTION = "execute"
     CATEGORY = "Ultralytics/Utils"
 
-    def execute(self, image, width, height, method="stretch", interpolation="nearest", condition="always", multiple_of=0, keep_proportion=False):
+    def execute(
+        self,
+        image,
+        width,
+        height,
+        method="stretch",
+        interpolation="nearest",
+        condition="always",
+        multiple_of=0,
+        keep_proportion=False,
+    ):
         _, oh, ow, _ = image.shape
         x = y = x2 = y2 = 0
         pad_left = pad_right = pad_top = pad_bottom = 0
@@ -408,7 +553,7 @@ class ImageResizeAdvanced:
             width = width - (width % multiple_of)
             height = height - (height % multiple_of)
 
-        if method == 'keep proportion' or method == 'pad':
+        if method == "keep proportion" or method == "pad":
             if width == 0 and oh < height:
                 width = MAX_RESOLUTION
             elif width == 0 and oh >= height:
@@ -420,10 +565,10 @@ class ImageResizeAdvanced:
                 height = ow
 
             ratio = min(width / ow, height / oh)
-            new_width = round(ow*ratio)
-            new_height = round(oh*ratio)
+            new_width = round(ow * ratio)
+            new_height = round(oh * ratio)
 
-            if method == 'pad':
+            if method == "pad":
                 pad_left = (width - new_width) // 2
                 pad_right = width - new_width - pad_left
                 pad_top = (height - new_height) // 2
@@ -431,23 +576,23 @@ class ImageResizeAdvanced:
 
             width = new_width
             height = new_height
-        elif method.startswith('fill'):
+        elif method.startswith("fill"):
             width = width if width > 0 else ow
             height = height if height > 0 else oh
 
             ratio = max(width / ow, height / oh)
-            new_width = round(ow*ratio)
-            new_height = round(oh*ratio)
+            new_width = round(ow * ratio)
+            new_height = round(oh * ratio)
             x = (new_width - width) // 2
             y = (new_height - height) // 2
             x2 = x + width
             y2 = y + height
             if x2 > new_width:
-                x -= (x2 - new_width)
+                x -= x2 - new_width
             if x < 0:
                 x = 0
             if y2 > new_height:
-                y -= (y2 - new_height)
+                y -= y2 - new_height
             if y < 0:
                 y = 0
             width = new_width
@@ -456,30 +601,40 @@ class ImageResizeAdvanced:
             width = width if width > 0 else ow
             height = height if height > 0 else oh
 
-        if "always" in condition \
-            or ("downscale if bigger" == condition and (oh > height or ow > width)) or ("upscale if smaller" == condition and (oh < height or ow < width)) \
-            or ("bigger area" in condition and (oh * ow > height * width)) or ("smaller area" in condition and (oh * ow < height * width)):
+        if (
+            "always" in condition
+            or ("downscale if bigger" == condition and (oh > height or ow > width))
+            or ("upscale if smaller" == condition and (oh < height or ow < width))
+            or ("bigger area" in condition and (oh * ow > height * width))
+            or ("smaller area" in condition and (oh * ow < height * width))
+        ):
 
-            outputs = image.permute(0,3,1,2)
+            outputs = image.permute(0, 3, 1, 2)
 
             if interpolation == "lanczos":
                 outputs = comfy.utils.lanczos(outputs, width, height)
             else:
-                outputs = F.interpolate(outputs, size=(height, width), mode=interpolation)
+                outputs = F.interpolate(
+                    outputs, size=(height, width), mode=interpolation
+                )
 
-            if method == 'pad':
+            if method == "pad":
                 if pad_left > 0 or pad_right > 0 or pad_top > 0 or pad_bottom > 0:
-                    outputs = F.pad(outputs, (pad_left, pad_right, pad_top, pad_bottom), value=0)
+                    outputs = F.pad(
+                        outputs, (pad_left, pad_right, pad_top, pad_bottom), value=0
+                    )
 
-            outputs = outputs.permute(0,2,3,1)
+            outputs = outputs.permute(0, 2, 3, 1)
 
-            if method.startswith('fill'):
+            if method.startswith("fill"):
                 if x > 0 or y > 0 or x2 > 0 or y2 > 0:
                     outputs = outputs[:, y:y2, x:x2, :]
         else:
             outputs = image
 
-        if multiple_of > 1 and (outputs.shape[2] % multiple_of != 0 or outputs.shape[1] % multiple_of != 0):
+        if multiple_of > 1 and (
+            outputs.shape[2] % multiple_of != 0 or outputs.shape[1] % multiple_of != 0
+        ):
             width = outputs.shape[2]
             height = outputs.shape[1]
             x = (width % multiple_of) // 2
@@ -488,7 +643,12 @@ class ImageResizeAdvanced:
             y2 = height - ((height % multiple_of) - y)
             outputs = outputs[:, y:y2, x:x2, :]
 
-        return(outputs, outputs.shape[2], outputs.shape[1],)
+        return (
+            outputs,
+            outputs.shape[2],
+            outputs.shape[1],
+        )
+
 
 class CocoToNumber:
     @classmethod
@@ -512,6 +672,7 @@ class CocoToNumber:
 
         return (class_num,)
 
+
 class UltralyticsModelLoader:
     @classmethod
     def INPUT_TYPES(cls):
@@ -520,12 +681,32 @@ class UltralyticsModelLoader:
             "optional": {
                 "model_name": (
                     [
-                        "yolov5nu.pt", "yolov5su.pt", "yolov5mu.pt", "yolov5lu.pt", "yolov5xu.pt",
-                        "yolov5n6u.pt", "yolov5s6u.pt", "yolov5m6u.pt", "yolov5l6u.pt", "yolov5x6u.pt",
-                        "yolov8n.pt", "yolov8s.pt", "yolov8m.pt", "yolov8l.pt", "yolov8x.pt",
-                        "yolov9t.pt", "yolov9s.pt", "yolov9m.pt", "yolov9c.pt", "yolov9e.pt",
-                        "yolov10n.pt", "yolov10s.pt", "yolov10m.pt", "yolov10l.pt", "yolov10x.pt",
-
+                        "yolov5nu.pt",
+                        "yolov5su.pt",
+                        "yolov5mu.pt",
+                        "yolov5lu.pt",
+                        "yolov5xu.pt",
+                        "yolov5n6u.pt",
+                        "yolov5s6u.pt",
+                        "yolov5m6u.pt",
+                        "yolov5l6u.pt",
+                        "yolov5x6u.pt",
+                        "yolov8n.pt",
+                        "yolov8s.pt",
+                        "yolov8m.pt",
+                        "yolov8l.pt",
+                        "yolov8x.pt",
+                        "yolov9t.pt",
+                        "yolov9s.pt",
+                        "yolov9m.pt",
+                        "yolov9c.pt",
+                        "yolov9e.pt",
+                        "yolov10n.pt",
+                        "yolov10s.pt",
+                        "yolov10m.pt",
+                        "yolov10l.pt",
+                        "yolov10x.pt",
+                        "yolo11x-seg.pt",
                     ],
                 ),
             },
@@ -542,6 +723,7 @@ class UltralyticsModelLoader:
             labels.append(category["name"])
         return labels
 
+
 class CustomUltralyticsModelLoader:
     @classmethod
     def INPUT_TYPES(s):
@@ -549,13 +731,11 @@ class CustomUltralyticsModelLoader:
         for root, dirs, filenames in os.walk(ultra_models_dir):
             for filename in filenames:
                 if filename.endswith(".pt"):
-                    relative_path = os.path.relpath(os.path.join(root, filename), ultra_models_dir)
+                    relative_path = os.path.relpath(
+                        os.path.join(root, filename), ultra_models_dir
+                    )
                     files.append(relative_path)
-        return {
-            "required": {
-                "model_path": (sorted(files), {"model_upload": True})
-            }
-        }
+        return {"required": {"model_path": (sorted(files), {"model_upload": True})}}
 
     CATEGORY = "Ultralytics/Model"
     RETURN_TYPES = ("ULTRALYTICS_MODEL",)
@@ -566,6 +746,7 @@ class CustomUltralyticsModelLoader:
         model = YOLO(model_full_path)
         return (model,)
 
+
 class UltralyticsModelLoader:
     @classmethod
     def INPUT_TYPES(cls):
@@ -574,12 +755,33 @@ class UltralyticsModelLoader:
             "optional": {
                 "model_name": (
                     [
-                        "yolov5nu.pt", "yolov5su.pt", "yolov5mu.pt", "yolov5lu.pt", "yolov5xu.pt",
-                        "yolov5n6u.pt", "yolov5s6u.pt", "yolov5m6u.pt", "yolov5l6u.pt", "yolov5x6u.pt",
-                        "yolov8n.pt", "yolov8s.pt", "yolov8m.pt", "yolov8l.pt", "yolov8x.pt",
-                        "yolov9t.pt", "yolov9s.pt", "yolov9m.pt", "yolov9c.pt", "yolov9e.pt",
-                        "yolov10n.pt", "yolov10s.pt", "yolov10m.pt", "yolov10l.pt", "yolov10x.pt",
-                        "mobile_sam.pt"
+                        "yolov5nu.pt",
+                        "yolov5su.pt",
+                        "yolov5mu.pt",
+                        "yolov5lu.pt",
+                        "yolov5xu.pt",
+                        "yolov5n6u.pt",
+                        "yolov5s6u.pt",
+                        "yolov5m6u.pt",
+                        "yolov5l6u.pt",
+                        "yolov5x6u.pt",
+                        "yolov8n.pt",
+                        "yolov8s.pt",
+                        "yolov8m.pt",
+                        "yolov8l.pt",
+                        "yolov8x.pt",
+                        "yolov9t.pt",
+                        "yolov9s.pt",
+                        "yolov9m.pt",
+                        "yolov9c.pt",
+                        "yolov9e.pt",
+                        "yolov10n.pt",
+                        "yolov10s.pt",
+                        "yolov10m.pt",
+                        "yolov10l.pt",
+                        "yolov10x.pt",
+                        "mobile_sam.pt",
+                        "yolo11x-seg.pt",
                     ],
                 ),
             },
@@ -624,6 +826,7 @@ class UltralyticsModelLoader:
         self.loaded_models[model_name] = model
         return (model,)
 
+
 class BBoxToCoco:
     def __init__(self):
         pass
@@ -657,47 +860,65 @@ class BBoxToCoco:
         if isinstance(bbox, list):
             for frame_idx, bbox_frame in enumerate(bbox):
                 image_id = frame_idx + 1
-                image_width, image_height = results[frame_idx].boxes.orig_shape[1], results[frame_idx].boxes.orig_shape[0]
-                coco_data["images"].append({
-                    "id": image_id,
-                    "file_name": f"{image_id:04d}.jpg",
-                    "height": image_height,
-                    "width": image_width,
-                })
+                image_width, image_height = (
+                    results[frame_idx].boxes.orig_shape[1],
+                    results[frame_idx].boxes.orig_shape[0],
+                )
+                coco_data["images"].append(
+                    {
+                        "id": image_id,
+                        "file_name": f"{image_id:04d}.jpg",
+                        "height": image_height,
+                        "width": image_width,
+                    }
+                )
 
-                for bbox_single, cls_single in zip(bbox_frame, results[frame_idx].boxes.cls):
+                for bbox_single, cls_single in zip(
+                    bbox_frame, results[frame_idx].boxes.cls
+                ):
                     x = float(bbox_single[0])
                     y = float(bbox_single[1])
                     w = float(bbox_single[2])
                     h = float(bbox_single[3])
                     category_id = int(cls_single.item()) + 1
 
-                    if category_id not in [cat["id"] for cat in coco_data["categories"]]:
-                        coco_data["categories"].append({
-                            "id": category_id,
-                            "name": category_names[category_id - 1],
-                            "supercategory": "none"
-                        })
+                    if category_id not in [
+                        cat["id"] for cat in coco_data["categories"]
+                    ]:
+                        coco_data["categories"].append(
+                            {
+                                "id": category_id,
+                                "name": category_names[category_id - 1],
+                                "supercategory": "none",
+                            }
+                        )
 
-                    coco_data["annotations"].append({
-                        "id": annotation_id,
-                        "image_id": image_id,
-                        "category_id": category_id,
-                        "bbox": [x, y, w, h],
-                        "area": w * h,
-                        "segmentation": [],
-                        "iscrowd": 0
-                    })
+                    coco_data["annotations"].append(
+                        {
+                            "id": annotation_id,
+                            "image_id": image_id,
+                            "category_id": category_id,
+                            "bbox": [x, y, w, h],
+                            "area": w * h,
+                            "segmentation": [],
+                            "iscrowd": 0,
+                        }
+                    )
                     annotation_id += 1
         else:
             image_id = 1
-            image_width, image_height = results[0].boxes.orig_shape[1], results[0].boxes.orig_shape[0]
-            coco_data["images"].append({
-                "id": image_id,
-                "file_name": f"{image_id:04d}.jpg",
-                "height": image_height,
-                "width": image_width,
-            })
+            image_width, image_height = (
+                results[0].boxes.orig_shape[1],
+                results[0].boxes.orig_shape[0],
+            )
+            coco_data["images"].append(
+                {
+                    "id": image_id,
+                    "file_name": f"{image_id:04d}.jpg",
+                    "height": image_height,
+                    "width": image_width,
+                }
+            )
 
             for bbox_single, cls_single in zip(bbox, results[0].boxes.cls):
                 if bbox_single.dim() == 0:
@@ -714,25 +935,30 @@ class BBoxToCoco:
                 category_id = int(cls_single.item()) + 1
 
                 if category_id not in [cat["id"] for cat in coco_data["categories"]]:
-                    coco_data["categories"].append({
-                        "id": category_id,
-                        "name": category_names[category_id - 1],
-                        "supercategory": "none"
-                    })
+                    coco_data["categories"].append(
+                        {
+                            "id": category_id,
+                            "name": category_names[category_id - 1],
+                            "supercategory": "none",
+                        }
+                    )
 
-                coco_data["annotations"].append({
-                    "id": annotation_id,
-                    "image_id": image_id,
-                    "category_id": category_id,
-                    "bbox": [x, y, w, h],
-                    "area": w * h,
-                    "segmentation": [],
-                    "iscrowd": 0
-                })
+                coco_data["annotations"].append(
+                    {
+                        "id": annotation_id,
+                        "image_id": image_id,
+                        "category_id": category_id,
+                        "bbox": [x, y, w, h],
+                        "area": w * h,
+                        "segmentation": [],
+                        "iscrowd": 0,
+                    }
+                )
                 annotation_id += 1
 
         coco_json = json.dumps(coco_data, indent=2)
         return (coco_json,)
+
 
 class BBoxToXYWH:
     def __init__(self):
@@ -747,8 +973,22 @@ class BBoxToXYWH:
             },
         }
 
-    RETURN_TYPES = ("STRING", "INT", "INT", "INT", "INT", "INT",)
-    RETURN_NAMES = ("StrBox", "BOXES","X_coord", "Y_coord", "Width", "Height",)
+    RETURN_TYPES = (
+        "STRING",
+        "INT",
+        "INT",
+        "INT",
+        "INT",
+        "INT",
+    )
+    RETURN_NAMES = (
+        "StrBox",
+        "BOXES",
+        "X_coord",
+        "Y_coord",
+        "Width",
+        "Height",
+    )
     FUNCTION = "bbox_to_xywh"
     OUTPUT_NODE = True
 
@@ -771,7 +1011,15 @@ class BBoxToXYWH:
 
         fullstr = f"x: {comfyui_x}, y: {comfyui_y}, w: {comfyui_w}, h: {comfyui_h}"
 
-        return (fullstr,bbox, comfyui_x,comfyui_y,comfyui_w,comfyui_h,)
+        return (
+            fullstr,
+            bbox,
+            comfyui_x,
+            comfyui_y,
+            comfyui_w,
+            comfyui_h,
+        )
+
 
 class ConvertToDict:
     def __init__(self):
@@ -784,7 +1032,7 @@ class ConvertToDict:
             "optional": {
                 "bbox": ("BOXES", {"default": None}),
                 "mask": ("MASKS", {"default": None}),
-            }
+            },
         }
 
     RETURN_TYPES = ("STRING",)
@@ -802,16 +1050,13 @@ class ConvertToDict:
                     "x": obj_bbox[0].item(),
                     "y": obj_bbox[1].item(),
                     "width": obj_bbox[2].item(),
-                    "height": obj_bbox[3].item()
+                    "height": obj_bbox[3].item(),
                 }
                 output["objects"].append({"bbox": bbox_dict})
 
         if mask is not None:
             for obj_mask in mask:
-                mask_dict = {
-                    "shape": obj_mask.shape,
-                    "data": obj_mask.tolist()
-                }
+                mask_dict = {"shape": obj_mask.shape, "data": obj_mask.tolist()}
                 if len(output["objects"]) > len(mask):
                     output["objects"].append({"mask": mask_dict})
                 else:
@@ -821,9 +1066,11 @@ class ConvertToDict:
             output = {"message": "No input provided"}
 
         import json
+
         output_str = json.dumps(output, indent=2)
 
         return {"ui": {"text": output_str}, "result": (output_str,)}
+
 
 class UltralyticsInference:
     @classmethod
@@ -838,33 +1085,69 @@ class UltralyticsInference:
                 "iou": ("FLOAT", {"default": 0.7, "min": 0, "max": 1, "step": 0.01}),
                 "height": ("INT", {"default": 640, "min": 64, "max": 1280, "step": 32}),
                 "width": ("INT", {"default": 640, "min": 64, "max": 1280, "step": 32}),
-                "device":(["cuda:0", "cpu"], ),
+                "device": (["cuda:0", "cpu"],),
                 "half": ("BOOLEAN", {"default": False}),
                 "augment": ("BOOLEAN", {"default": False}),
                 "agnostic_nms": ("BOOLEAN", {"default": False}),
                 "classes": ("STRING", {"default": "None"}),
-
             },
         }
-    RETURN_TYPES = ("ULTRALYTICS_RESULTS","IMAGE", "BOXES", "MASKS", "PROBABILITIES", "KEYPOINTS", "OBB", "LABELS", "MASK",)
+
+    RETURN_TYPES = (
+        "ULTRALYTICS_RESULTS",
+        "IMAGE",
+        "BOXES",
+        "MASKS",
+        "PROBABILITIES",
+        "KEYPOINTS",
+        "OBB",
+        "LABELS",
+        "MASK",
+    )
     FUNCTION = "inference"
     CATEGORY = "Ultralytics/Inference"
 
-    def inference(self, model, image, conf=0.25, iou=0.7, height=640, width=640, device="cuda:0", half=False, augment=False, agnostic_nms=False, classes=None):
+    def inference(
+        self,
+        model,
+        image,
+        conf=0.25,
+        iou=0.7,
+        height=640,
+        width=640,
+        device="cuda:0",
+        half=False,
+        augment=False,
+        agnostic_nms=False,
+        classes=None,
+    ):
         if classes == "None":
             class_list = None
         else:
-            class_list = [int(cls.strip()) for cls in classes.split(',')]
+            class_list = [int(cls.strip()) for cls in classes.split(",")]
 
         if image.shape[0] > 1:
             batch_size = image.shape[0]
             results = []
             for i in range(batch_size):
                 yolo_image = image[i].unsqueeze(0).permute(0, 3, 1, 2)
-                result = model.predict(yolo_image, conf=conf, iou=iou, imgsz=(height, width), device=device, half=half, augment=augment, agnostic_nms=agnostic_nms, classes=class_list)
+                result = model.predict(
+                    yolo_image,
+                    conf=conf,
+                    iou=iou,
+                    imgsz=(height, width),
+                    device=device,
+                    half=half,
+                    augment=augment,
+                    agnostic_nms=agnostic_nms,
+                    classes=class_list,
+                )
                 results.append(result)
             boxes = [result[0].boxes.xywh for result in results]
-            masks_temp = [self.getComfyMasks(result[0].boxes, image.shape[2], image.shape[1]) for result in results]
+            masks_temp = [
+                self.getComfyMasks(result[0].boxes, image.shape[2], image.shape[1])
+                for result in results
+            ]
             comfy_masks = pad_sequence(masks_temp, batch_first=True)
             masks = [result[0].masks for result in results]
             probs = [result[0].probs for result in results]
@@ -874,16 +1157,38 @@ class UltralyticsInference:
 
         else:
             yolo_image = image.permute(0, 3, 1, 2)
-            results = model.predict(yolo_image, conf=conf, iou=iou, imgsz=(height,width), device=device, half=half, augment=augment, agnostic_nms=agnostic_nms, classes=class_list)
+            results = model.predict(
+                yolo_image,
+                conf=conf,
+                iou=iou,
+                imgsz=(height, width),
+                device=device,
+                half=half,
+                augment=augment,
+                agnostic_nms=agnostic_nms,
+                classes=class_list,
+            )
             boxes = results[0].boxes.xywh
-            comfy_masks = self.getComfyMasks(results[0].boxes, image.shape[2], image.shape[1])
+            comfy_masks = self.getComfyMasks(
+                results[0].boxes, image.shape[2], image.shape[1]
+            )
             masks = results[0].masks
             probs = results[0].probs
             keypoints = results[0].keypoints
             obb = results[0].obb
             labels = results[0].boxes.cls.cpu().tolist()
 
-        return (results, image, boxes, masks, probs, keypoints, obb, labels, comfy_masks, )
+        return (
+            results,
+            image,
+            boxes,
+            masks,
+            probs,
+            keypoints,
+            obb,
+            labels,
+            comfy_masks,
+        )
 
     def getComfyMasks(self, boxes, width, height):
         boxes_xyxyn = boxes.xyxyn
@@ -908,6 +1213,7 @@ class UltralyticsInference:
         # return empty mask
         return torch.zeros((height, width), dtype=torch.float32).unsqueeze(0)
 
+
 class UltralyticsVisualization:
     @classmethod
     def INPUT_TYPES(s):
@@ -926,35 +1232,89 @@ class UltralyticsVisualization:
                 "color_mode": (["class", "instance"], {"default": "class"}),
             },
         }
+
     RETURN_TYPES = ("IMAGE",)
     FUNCTION = "visualize"
     CATEGORY = "Ultralytics/Vis"
 
     # ref: https://docs.ultralytics.com/reference/engine/results/#ultralytics.engine.results.Results.plot
-    def visualize(self, image, results, line_width=3, font_size=1, sam=True, kpt_line=True, labels=True, boxes=True, masks=True, probs=True, color_mode="class"):
+    def visualize(
+        self,
+        image,
+        results,
+        line_width=3,
+        font_size=1,
+        sam=True,
+        kpt_line=True,
+        labels=True,
+        boxes=True,
+        masks=True,
+        probs=True,
+        color_mode="class",
+    ):
         if image.shape[0] > 1:
             batch_size = image.shape[0]
             annotated_frames = []
             for result in results:
                 for r in result:
-                    im_bgr = r.plot(im_gpu=True, line_width=line_width, font_size=font_size, kpt_line=kpt_line, labels=labels, boxes=boxes, masks=masks, probs=probs, color_mode=color_mode)
+                    im_bgr = r.plot(
+                        im_gpu=True,
+                        line_width=line_width,
+                        font_size=font_size,
+                        kpt_line=kpt_line,
+                        labels=labels,
+                        boxes=boxes,
+                        masks=masks,
+                        probs=probs,
+                        color_mode=color_mode,
+                    )
                     annotated_frames.append(im_bgr)
 
-            tensor_image = torch.stack([torch.from_numpy(np.array(frame).astype(np.float32) / 255.0) for frame in annotated_frames])
+            tensor_image = torch.stack(
+                [
+                    torch.from_numpy(np.array(frame).astype(np.float32) / 255.0)
+                    for frame in annotated_frames
+                ]
+            )
 
         else:
             annotated_frames = []
             for r in results:
                 if sam == True:
-                    im_bgr = r.plot(line_width=line_width, font_size=font_size, kpt_line=kpt_line, labels=labels, boxes=boxes, masks=masks, probs=probs, color_mode=color_mode)  # BGR-order numpy array
+                    im_bgr = r.plot(
+                        line_width=line_width,
+                        font_size=font_size,
+                        kpt_line=kpt_line,
+                        labels=labels,
+                        boxes=boxes,
+                        masks=masks,
+                        probs=probs,
+                        color_mode=color_mode,
+                    )  # BGR-order numpy array
 
                 else:
-                    im_bgr = r.plot(im_gpu=True, line_width=line_width, font_size=font_size, kpt_line=kpt_line, labels=labels, boxes=boxes, masks=masks, probs=probs, color_mode=color_mode)  # BGR-order numpy array
+                    im_bgr = r.plot(
+                        im_gpu=True,
+                        line_width=line_width,
+                        font_size=font_size,
+                        kpt_line=kpt_line,
+                        labels=labels,
+                        boxes=boxes,
+                        masks=masks,
+                        probs=probs,
+                        color_mode=color_mode,
+                    )  # BGR-order numpy array
                 annotated_frames.append(im_bgr)
 
-            tensor_image = torch.stack([torch.from_numpy(np.array(frame).astype(np.float32) / 255.0) for frame in annotated_frames])
+            tensor_image = torch.stack(
+                [
+                    torch.from_numpy(np.array(frame).astype(np.float32) / 255.0)
+                    for frame in annotated_frames
+                ]
+            )
 
         return (tensor_image,)
+
 
 class ViewText:
     # https://github.com/gokayfem/ComfyUI_VLM_nodes/blob/main/nodes/simpletext.py
@@ -978,6 +1338,7 @@ class ViewText:
     def view_text(self, text):
         # Parse the combined JSON string
         return {"ui": {"text": text}, "result": (text,)}
+
 
 NODE_CLASS_MAPPINGS = {
     "UltralyticsModelLoader": UltralyticsModelLoader,
