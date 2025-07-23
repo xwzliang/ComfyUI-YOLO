@@ -673,57 +673,6 @@ class CocoToNumber:
         return (class_num,)
 
 
-class UltralyticsModelLoader:
-    @classmethod
-    def INPUT_TYPES(cls):
-        return {
-            "required": {},
-            "optional": {
-                "model_name": (
-                    [
-                        "yolov5nu.pt",
-                        "yolov5su.pt",
-                        "yolov5mu.pt",
-                        "yolov5lu.pt",
-                        "yolov5xu.pt",
-                        "yolov5n6u.pt",
-                        "yolov5s6u.pt",
-                        "yolov5m6u.pt",
-                        "yolov5l6u.pt",
-                        "yolov5x6u.pt",
-                        "yolov8n.pt",
-                        "yolov8s.pt",
-                        "yolov8m.pt",
-                        "yolov8l.pt",
-                        "yolov8x.pt",
-                        "yolov9t.pt",
-                        "yolov9s.pt",
-                        "yolov9m.pt",
-                        "yolov9c.pt",
-                        "yolov9e.pt",
-                        "yolov10n.pt",
-                        "yolov10s.pt",
-                        "yolov10m.pt",
-                        "yolov10l.pt",
-                        "yolov10x.pt",
-                        "yolo11x-seg.pt",
-                    ],
-                ),
-            },
-        }
-
-    RETURN_TYPES = ("ULTRALYTICS_MODEL",)
-    FUNCTION = "load_model"
-
-    CATEGORY = "Ultralytics/Model"
-
-    def coco_to_labels(self, coco):
-        labels = []
-        for category in coco["categories"]:
-            labels.append(category["name"])
-        return labels
-
-
 class CustomUltralyticsModelLoader:
     @classmethod
     def INPUT_TYPES(s):
